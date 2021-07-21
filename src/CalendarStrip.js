@@ -146,8 +146,7 @@ class CalendarStrip extends Component {
       dayComponentWidth: 0,
       height: 0,
       monthFontSize: 0,
-      selectorSize: 0,
-      numVisibleDays: props.numDaysInWeek,
+      selectorSize: 0
     };
 
     this.animations = [];
@@ -162,23 +161,22 @@ class CalendarStrip extends Component {
     let updateState = false;
 
     if (!this.compareDates(prevProps.startingDate, this.props.startingDate) ||
-        !this.compareDates(prevProps.selectedDate, this.props.selectedDate) ||
-        prevProps.datesBlacklist !== this.props.datesBlacklist ||
-        prevProps.datesWhitelist !== this.props.datesWhitelist ||
-        prevProps.markedDates  !== this.props.markedDates  ||
-        prevProps.customDatesStyles !== this.props.customDatesStyles )
-    {
+      !this.compareDates(prevProps.selectedDate, this.props.selectedDate) ||
+      prevProps.datesBlacklist !== this.props.datesBlacklist ||
+      prevProps.datesWhitelist !== this.props.datesWhitelist ||
+      prevProps.markedDates !== this.props.markedDates ||
+      prevProps.customDatesStyles !== this.props.customDatesStyles) {
       // Protect against undefined startingDate prop
       let _startingDate = this.props.startingDate || this.state.startingDate;
 
-      startingDate = { startingDate: this.setLocale(_startingDate)};
-      selectedDate = { selectedDate: this.setLocale(this.props.selectedDate)};
+      startingDate = { startingDate: this.setLocale(_startingDate) };
+      selectedDate = { selectedDate: this.setLocale(this.props.selectedDate) };
       days = this.createDays(startingDate.startingDate, selectedDate.selectedDate);
       updateState = true;
     }
 
     if (updateState) {
-      this.setState({...startingDate, ...selectedDate, ...days });
+      this.setState({ ...startingDate, ...selectedDate, ...days });
     }
   }
 
@@ -204,8 +202,7 @@ class CalendarStrip extends Component {
   // JS date, or ISO 8601 strings.
   // Returns true if the datetimes values are the same; false otherwise.
   compareDates = (date1, date2) => {
-    if (date1 && date1.valueOf && date2 && date2.valueOf)
-    {
+    if (date1 && date1.valueOf && date2 && date2.valueOf) {
       return moment(date1).isSame(date2, "day");
     } else {
       return JSON.stringify(date1) === JSON.stringify(date2);
@@ -216,7 +213,7 @@ class CalendarStrip extends Component {
   setLocale = date => {
     let _date = date && moment(date);
     if (_date) {
-      _date.set({ hour: 12}); // keep date the same regardless of timezone shifts
+      _date.set({ hour: 12 }); // keep date the same regardless of timezone shifts
       if (this.props.locale) {
         _date = _date.locale(this.props.locale.name);
       }
@@ -292,11 +289,11 @@ class CalendarStrip extends Component {
     let startingDate = moment(date);
     startingDate = this.props.useIsoWeekday ? startingDate.startOf("isoweek") : startingDate;
     const days = this.createDays(startingDate);
-    this.setState({startingDate, ...days});
+    this.setState({ startingDate, ...days });
   }
 
   //Handling press on date/selecting date
-  onDateSelected = selectedDate => {
+  onDateSelected = (selectedDate, throughButton = false) => {
     let newState;
     if (this.props.scrollable) {
       newState = { selectedDate };
@@ -307,13 +304,13 @@ class CalendarStrip extends Component {
         ...this.createDays(this.state.startingDate, selectedDate),
       };
     }
-    this.setState(() => newState);
+    this.setState(newState);
     const _selectedDate = selectedDate && selectedDate.clone();
-    this.props.onDateSelected && this.props.onDateSelected(_selectedDate);
+    this.props.onDateSelected && this.props.onDateSelected(_selectedDate, throughButton);
   }
 
   // Get the currently selected date (Moment JS object)
-  getSelectedDate = () => {
+  getSelectedDate = date => {
     if (!this.state.selectedDate || this.state.selectedDate.valueOf() === 0) {
       return; // undefined (no date has been selected yet)
     }
@@ -400,7 +397,7 @@ class CalendarStrip extends Component {
       marginHorizontal,
       numVisibleDays,
     },
-    () => this.setState( {...this.createDays(this.state.startingDate)} ));
+      () => this.setState({ ...this.createDays(this.state.startingDate) }));
   }
 
   getItemLayout = (data, index) => {
@@ -472,7 +469,7 @@ class CalendarStrip extends Component {
     if (scrollable) {
       numDays = this.numDaysScroll;
       // Center start date in scroller.
-      _startingDate = startingDate.clone().subtract(numDays/2, "days");
+      _startingDate = startingDate.clone().subtract(numDays / 2, "days");
       if (minDate && _startingDate.isBefore(minDate, "day")) {
         _startingDate = moment(minDate);
       }
@@ -480,7 +477,7 @@ class CalendarStrip extends Component {
 
     for (let i = 0; i < numDays; i++) {
       let date;
-      if (useIsoWeekday) {
+      if (useIsoWeekday && !scrollable) {
         // isoWeekday starts from Monday
         date = this.setLocale(_startingDate.clone().isoWeekday(i + 1));
       } else {
@@ -493,7 +490,7 @@ class CalendarStrip extends Component {
         if (date.isSame(startingDate, "day")) {
           initialScrollerIndex = i;
         }
-        datesList.push({date});
+        datesList.push({ date });
       }
       else {
         days.push(this.renderDay({
@@ -501,7 +498,7 @@ class CalendarStrip extends Component {
           key: date.format("YYYY-MM-DD"),
           ...this.createDayProps(selectedDate),
         }));
-        datesList.push({date});
+        datesList.push({ date });
       }
     }
 
@@ -533,7 +530,7 @@ class CalendarStrip extends Component {
   }
 
   renderHeader() {
-    return ( this.props.showMonth &&
+    return (this.props.showMonth &&
       <CalendarHeader
         calendarHeaderFormat={this.props.calendarHeaderFormat}
         calendarHeaderContainerStyle={this.props.calendarHeaderContainerStyle}
@@ -556,7 +553,7 @@ class CalendarStrip extends Component {
           data={this.state.datesList}
           pagingEnabled={this.props.scrollerPaging}
           renderDay={this.renderDay}
-          renderDayParams={{...this.createDayProps(this.state.selectedDate)}}
+          renderDayParams={{ ...this.createDayProps(this.state.selectedDate) }}
           maxSimultaneousDays={this.numDaysScroll}
           initialRenderIndex={this.state.initialScrollerIndex}
           minDate={this.props.minDate}
